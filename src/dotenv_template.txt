@@ -1,0 +1,1 @@
+DISCORD_TOKEN=replace_this_value_with_the_actual_token
