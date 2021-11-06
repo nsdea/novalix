@@ -1,1 +1,8 @@
+humanize
+asyncpraw
+dateparser
+youtube_dl
+python-dotenv
+discord-together
+
 git+https://github.com/Pycord-Development/pycord

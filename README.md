@@ -1,7 +1,17 @@
-# NOVΛLIX・The
-NOVΛLIX・The only Discord bot you'll every need.
+# NOVΛLIX・Discord Bot
+**NOVΛLIX**・The only Discord bot you'll ever need.
 
-# Installation
+## Installation
+### Setup
+Make sure to **run the code from this (root-)directory**.
+
+### Install
 ```bash
-pip install git+https://github.com/Pycord-Development/pycord
+pip install -r requirements.txt
+```
+
+### Run
+
+```bash
+python3 src/bot.py
 ```
