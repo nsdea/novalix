@@ -68,12 +68,12 @@ class Music(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @slash_command()
+    @slash_command(description='🎤 Joins a voice channel.')
     async def join(
         self,
         ctx,
         channel: discord.commands.Option(
-            discord.VoiceChannel, 'Channel to join (optional)') = None
+            discord.VoiceChannel, 'Channel to join (optional)', required=False, default=None)=None
     ):
 
         """Joins a voice channel"""
@@ -86,14 +86,12 @@ class Music(commands.Cog):
         await channel.connect()
         await ctx.respond(embed=discord.Embed(title=':white_check_mark: Joined!.', description='Now, try `/play`.', color=management.color()))
 
-    @slash_command(description='Plays a song in a voice channel.')
+    @slash_command(description='🎶 Plays a song in a voice channel.')
     async def play(
         self,
         ctx,
         search_term: discord.commands.Option(str, 'Video to play'),
     ):
-
-        """Streams from a url (same as yt, but doesn't predownload)"""
         if not ctx.voice_client:
             return await ctx.respond(embed=discord.Embed(title=':x: You\'re not connected to a voice channel.', description='Please join a voice channel and run `/join`.', color=management.color('error')))
 
@@ -103,41 +101,44 @@ class Music(commands.Cog):
 
         video_info = player.__dict__['data']
 
-        embed = embed = discord.Embed(
+        embed = discord.Embed(
             title=f'{"📡" if video_info["is_live"] else "🎵"} Playing: {player.title}',
-            description='',
-            color=management.color()).set_thumbnail(url=video_info['thumbnail']
+            description=f':loud_sound: Playing in {ctx.author.voice.channel.mention}',
+            color=management.color(),
+            timestamp=dateparser.parse(video_info['upload_date'], settings={'DATE_ORDER': 'YMD'})
         )
-        embed.add_field(name='📅 Upload Date', value=humanize.naturaldate(dateparser.parse(video_info['upload_date'], settings={'DATE_ORDER': 'YMD'})))
+
+        print(video_info['upload_date'])
+        embed.set_thumbnail(url=video_info['thumbnail'])
         embed.add_field(name='⌛ Duration', value=humanize.intword(datetime.timedelta(seconds=video_info['duration'])))
         embed.add_field(name='📊 Views', value=humanize.intword(video_info['view_count']))
         embed.add_field(name='👍 Likes', value=humanize.intword(video_info['like_count']))
-        
         embed.set_author(name=video_info['uploader'], url=video_info['uploader_url'])
-        
-        await ctx.respond(embed=embed)
+    
+        try:
+            await ctx.respond(embed=embed)
+        except:
+            await ctx.send(embed=embed)
 
-    @slash_command()
+    @slash_command(description='🔊 Changes the music volume')
     async def volume(
         self,
         ctx,
-        volume: discord.commands.Option(int, 'Percent') = 100,
+        volume: discord.commands.Option(int, 'Percent', required=False, default=50),
     ):
-        """Changes the player's volume"""
         if ctx.voice_client is None:
             return await ctx.respond(embed=discord.Embed(title=f'Run `/join` and try again!', color=management.color('error')))
 
         ctx.voice_client.source.volume = volume / 100
         await ctx.respond(embed=discord.Embed(title=f'Changed volume to {volume}%.', color=management.color()))
 
-    @slash_command()
+    @slash_command(description='🛑 Stops song and disconnects from the voice channel.')
     async def stop(
         self,
         ctx,
     ):
-        """Stops and disconnects the music system"""
         await ctx.voice_client.disconnect()
-        await ctx.respond(embed=discord.Embed(title='🛑 Stopped', color=management.color()))
+        await ctx.respond(embed=discord.Embed(title='🛑 Stopped', color=management.color('error')))
 
     @play.before_invoke
     async def ensure_voice(self, ctx):

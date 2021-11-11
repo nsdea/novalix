@@ -29,18 +29,19 @@ class Memes(commands.Cog):
             username=os.getenv('REDDIT_USERNAME'),
         )
 
-    @slash_command(aliases=['memes', 'meme'], description='Search Reddit for memes')
-    async def reddit(self, ctx,
-        sub: str='memes|dankmemes|me_irl|wholesomememes|okbuddyretard|comedyheaven|meme',
-        randomizer: int=60):
-
+    @slash_command(description='🔍 Search Reddit for memes')
+    async def reddit(
+        self, ctx,
+        sub: str=discord.commands.Option(str, 'Subreddit (default: random meme sub)', required=False, default='memes|dankmemes|me_irl|wholesomememes|okbuddyretard|comedyheaven|meme'),
+        randomizer: str=discord.commands.Option(int, 'Randomizer Temperature (default: 60)', required=False, default=60)
+    ):
         class RedditGUI(discord.ui.View):
             @discord.ui.button(label='Another one', style=discord.ButtonStyle.primary)
-            async def button_callback(self):
+            async def button_callback(self, button, interaction, *args, **kwargs):
                 await send()
 
         async def send(ctx=ctx, sub=sub, randomizer=randomizer):
-            msg = await ctx.respond(embed=discord.Embed(title='Gimme a sec...').set_footer(text='TIp: if it takes ages for the memes to load, set "randomizer" to a lower value (like 30), but if the memes are always the same ones, set "randomizer" to a high value.'))
+            msg = await ctx.respond(embed=discord.Embed(title='Gimme a sec...').set_footer(text='**Tip:** if it takes ages for the memes to load, set "randomizer" to a lower value (like 30), but if the memes are always the same ones, set "randomizer" to a high value.'))
 
             BASE_URL = 'https://reddit.com'
             

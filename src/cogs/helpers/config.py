@@ -13,7 +13,7 @@ def load():
     parsed_config_data = yaml.load(open(CONFIG_PATH), Loader=yaml.SafeLoader)
     return parsed_config_data
 
-def nested_set(dic: dict, keys: list, value):
+def nested_set(dic: dict, keys: list, value) -> None:
     """Helps with editing a nested dictionary, see https://stackoverflow.com/a/13688108/14345173
 
     Args:
@@ -26,7 +26,7 @@ def nested_set(dic: dict, keys: list, value):
         dic = dic.setdefault(key, {})
     dic[keys[-1]] = value
 
-def edit(path: Union[str, list], to: str):
+def edit(path: Union[str, list], to: str) -> None:
     """Edits the config
 
     Args:

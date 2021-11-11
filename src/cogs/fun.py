@@ -12,7 +12,7 @@ class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @slash_command(description='Create a YouTube Together')
+    @slash_command(description='📺 Create a YouTube Together')
     async def ytt(self, ctx, channel: discord.VoiceChannel=None):
         if not channel: # no channel is specified
             if ctx.author.voice: # user is in a voice channel
