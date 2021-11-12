@@ -1,4 +1,7 @@
 gevent
+urllib3
+chardet
+requests
 humanize
 asyncpraw
 dateparser

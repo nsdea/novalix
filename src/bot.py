@@ -6,7 +6,7 @@ except ModuleNotFoundError:
     os.system('pip install -r requirements.txt')
     import gevent.monkey
 
-gevent.monkey.patch_all(thread=False, select=False) # patch everything
+gevent.monkey.patch_all() # patch everything
 
 import colorama
 colorama.init(autoreset=True)
