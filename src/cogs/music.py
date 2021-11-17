@@ -121,7 +121,7 @@ class Music(commands.Cog):
         ctx.voice_client.play(player, after=lambda e: print(
             f'Player error: {e}') if e else None)
 
-        embed = await self.video_embed(ctx=ctx, player=player)
+        embed = await self.video_embed(player=player)
 
         try:
             await ctx.respond(embed=embed)
