@@ -16,7 +16,7 @@ class Info(commands.Cog):
     @slash_command(name='help', aliases=['info'], description='📃 General Bot Information')
     async def info(self, ctx):
         embed = discord.Embed(title='Help', color=management.color(), description='I\'m to lazy for this right now, enjoy this meme instead--')
-        embed.set_image('https://sayingimages.com/wp-content/uploads/stop-it-help-meme.jpg')
+        embed.set_image(url='https://sayingimages.com/wp-content/uploads/stop-it-help-meme.jpg')
         
         await ctx.respond(embed=embed)
 
