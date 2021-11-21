@@ -22,6 +22,7 @@ try:
 except ImportError:
     import helpers.config, helpers.management, helpers.voice
 
+import difflib
 import discord
 
 from discord.ext import commands
@@ -32,11 +33,35 @@ class CraftChat(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if '!play ' in message.content and 'unique players ever joined' in message.channel.topic:
-            await voice.ensure_voice(message)
+        if 'unique players ever joined' in message.channel.topic: # channel is a DiscordSRV webhook chatsync channel
+            if '!play ' in message.content:
+                await voice.ensure_voice(message)
 
-            player = await voice.play_song(client=self.client, ctx=message, search_term=message.content.split('!play ')[1])
-            await message.channel.send(f'[NOVALIX CraftChat] Playing Song: {player.title}')
+                try:
+                    player = await voice.play_song(client=self.client, ctx=message, search_term=message.content.split('!play ')[1])
+                except AttributeError:
+                    await message.channel.send(f'[NOVALIX CraftChat] Please do !join @user or #channel first, for example: "!join #music" or "!join @ONLIX"')
+                else:
+                    await message.channel.send(f'[NOVALIX CraftChat] Playing Song: {player.title}')
+
+            if '!join ' in message.content:
+                selected = message.content.split('!join ')[1]
+                is_channel = selected[0] == '#'
+
+                if is_channel:
+                    channel_names = [c.name for c in message.guild.voice_channels]
+                    found = difflib.get_close_matches(word=selected[1:], possibilities=channel_names, n=1)[0] # I could leave this out, but it's for the UX
+                    channel = discord.utils.get(message.guild.voice_channels, name=found)
+                    
+                else:
+                    member_names = [m.name for m in message.guild.members]
+                    found = difflib.get_close_matches(word=selected[1:], possibilities=member_names, n=1)[0] # I could leave this out, but it's for the UX
+                    member = discord.utils.get(message.guild.members, name=found)
+                    channel = member.voice.channel
+            
+                await channel.connect()
+                await message.channel.send(f'[NOVALIX CraftChat] Joined #{channel.name}!')
+
 
 def setup(client):
     client.add_cog(CraftChat(client))
