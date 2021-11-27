@@ -50,6 +50,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 async def play_song(client, ctx, search_term: str):
+    global ytdl
+
     if isinstance(ctx, commands.Context):
         voice_system = ctx.voice_client
     else:
@@ -58,7 +60,8 @@ async def play_song(client, ctx, search_term: str):
     player = await YTDLSource.from_url(search_term, loop=client.loop, stream=True)
     voice_system.play(player, after=lambda e: print(
         f'Player error: {e}') if e else None)
-    
+
+    ytdl.cache.remove()
     return player
 
 async def ensure_voice(ctx):
