@@ -4,6 +4,7 @@ except ImportError:
     import helpers.config, helpers.management
 
 import discord
+import traceback
 
 from discord.ext import commands
 from discord.commands import slash_command
@@ -14,12 +15,15 @@ class Errors(commands.Cog):
 
     @commands.Cog.listener()
     async def on_application_command_error(self, ctx, error):
+        error_message = '\n'.join(traceback.format_exception(type(error), error, error.__traceback__))
+        error_message = error_message.split('\n\nThe above exception was the direct cause of the following exception:')[0]
+
         embed = discord.Embed(
             title='Command Error',
-            description=f'```py\n{str(error)}```',
+            description=f'```py\n{error_message}```',
             color=management.color('error')
         )
-        
+
         try:
             await ctx.respond(embed=embed)
         except:

@@ -6,7 +6,7 @@ The reason why this system isn't recommended to actually use in production is th
 message content scopes will get massive restrictions soon (March 2022).
 From then, all systems/extensions that use message.content/on_message won't work
 perfectly fine anymore, especially if your bot reaches 100 serves and still isn't
-verified. It's too complicated to write down here though.  
+verified. It's too complicated to write down here though.
 
 ====================================================================================
 
@@ -33,7 +33,18 @@ class CraftChat(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not message.channel.topic:
+            return
+
         if 'unique players ever joined' in message.channel.topic: # channel is a DiscordSRV webhook chatsync channel
+            log_message = ''
+
+            if message.embeds:
+                log_message = message.embeds[0].author.name
+
+            if log_message.endswith(' joined the server'):
+                player = await voice.play_song(client=self.client, ctx=message, search_term='https://youtu.be/76EsiMBf1kY')
+
             if '!play ' in message.content:
                 await voice.ensure_voice(message)
 
@@ -52,16 +63,15 @@ class CraftChat(commands.Cog):
                     channel_names = [c.name for c in message.guild.voice_channels]
                     found = difflib.get_close_matches(word=selected[1:], possibilities=channel_names, n=1)[0] # I could leave this out, but it's for the UX
                     channel = discord.utils.get(message.guild.voice_channels, name=found)
-                    
+
                 else:
                     member_names = [m.name for m in message.guild.members]
                     found = difflib.get_close_matches(word=selected[1:], possibilities=member_names, n=1)[0] # I could leave this out, but it's for the UX
                     member = discord.utils.get(message.guild.members, name=found)
                     channel = member.voice.channel
-            
+
                 await channel.connect()
                 await message.channel.send(f'[NOVALIX CraftChat] Joined #{channel.name}!')
-
 
 def setup(client):
     client.add_cog(CraftChat(client))

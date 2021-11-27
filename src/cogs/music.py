@@ -8,6 +8,7 @@ except ImportError:
 
 import discord
 import datetime
+from discord.ui.select import S
 import humanize
 import dateparser
 import discord.commands
@@ -19,6 +20,10 @@ from discord.commands import slash_command
 class Music(commands.Cog):
     def __init__(self, client):
         self.client = client
+
+    async def leave(self, ctx):
+        bot_account = await ctx.guild.fetch_member(self.client.user.id)
+        await bot_account.move_to(None)
 
     @slash_command(description='🎤 Joins a voice channel.')
     async def join(
@@ -58,6 +63,23 @@ class Music(commands.Cog):
 
         return embed
 
+    class MusicEmbedGUI(discord.ui.View):
+        def __init__(self, ctx, player):
+            super().__init__()
+
+            self.ctx = ctx
+            self.player = player
+
+            @discord.ui.button(label='Stop', style=discord.ButtonStyle.danger)
+            async def button_callback(self, button, interaction, *args, **kwargs):
+                await self.leave(ctx=self.ctx)
+
+            # @discord.ui.Button(label='Download', style=discord.ButtonStyle.url, url=f'https://onlix.me/watch?v={self.player.__dict__["data"]["id"]}')
+            # async def _():
+            #     pass
+
+        # discord.ui.View.add_item(discord.ui.Button(label='Download', style=discord.ButtonStyle.url, url=))
+
     @slash_command(description='🎶 Plays a song in a voice channel.')
     async def play(
         self,
@@ -76,19 +98,26 @@ class Music(commands.Cog):
         player = await voice.play_song(client=self.client, ctx=ctx, search_term=search_term)
         embed = await self.video_embed(ctx=ctx, player=player)
 
+        view = self.MusicEmbedGUI(ctx=ctx, player=player)
+        # view.add_item(discord.ui.button(label='Go to website', url='https://example.com/', style=discord.ButtonStyle.url))
+        # view = self.MusicEmbedGUI(ctx=ctx, player=player)
+
         try:
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, view=view)
         except:
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, view=view)
 
     @slash_command(description='🔊 Changes the music volume')
     async def volume(
         self,
         ctx,
-        volume: discord.commands.Option(int, 'Percent', required=False, default=50),
+        volume: discord.commands.Option(int, 'Percent', required=False, default=1337),
     ):
         if ctx.voice_client is None:
             return await ctx.respond(embed=discord.Embed(title=f'Run `/join` and try again!', color=management.color('error')))
+
+        if volume == 1337:
+            return await ctx.respond(embed=discord.Embed(title=f'Volume: {ctx.voice_client.source.volume * 100}%', color=management.color()))
 
         ctx.voice_client.source.volume = volume / 100
         await ctx.respond(embed=discord.Embed(title=f'Changed volume to {volume}%.', color=management.color()))
@@ -98,18 +127,16 @@ class Music(commands.Cog):
         self,
         ctx,
     ):
-        bot_account = await ctx.guild.fetch_member(self.client.user.id)
-
-        await bot_account.move_to(None)
+        await self.leave(ctx=ctx)
 
         try:
             await ctx.voice_client.stop()
             await ctx.voice_client.disconnect()
         except:
-            await ctx.respond(embed=discord.Embed(title=':x: Could not stop!', color=management.color('error')))
+            await ctx.respond(embed=discord.Embed(title='🛑 Stopped', color=management.color('error')))
 
         else:
-            await ctx.respond(embed=discord.Embed(title='🛑 Stopped', color=management.color('error')))
+            await ctx.respond(embed=discord.Embed(title='🛑 Stopped without any errors!', color=management.color('error')))
 
 def setup(client):
     client.add_cog(Music(client))
