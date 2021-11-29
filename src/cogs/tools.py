@@ -3,7 +3,6 @@ try:
 except ImportError:
     import helpers.config, helpers.management
 
-import socket
 import discord.commands
 
 from discord.ext import commands

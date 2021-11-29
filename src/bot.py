@@ -35,9 +35,7 @@ client = commands.Bot(command_prefix=PREFIX, intents=discord.Intents.all())
 
 async def status_task():
     while True:
-        await client.change_presence(activity=discord.Game(f'in BETA'))
-        await asyncio.sleep(10)
-
+        await client.change_presence(activity=discord.Game(f'v0.5・open source'))
 
 @client.event
 async def on_ready():

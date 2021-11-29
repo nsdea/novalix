@@ -1,17 +1,33 @@
 # NOVΛLIX・Discord Bot
-**NOVΛLIX**・The only Discord bot you'll ever need.
+**NOVΛLIX**・Allrounder Discord bot for a variety of features.
+
+## Feature Overview
+- Voice and Music `/play`
+- Memes and Fun `/reddit`
+- YouTube Together `/ytt`
+
 
 ## Installation
 ### Setup
-Make sure to **run the code from this (root-)directory**.
+> Make sure to **run the code from this (root-)directory**.
 
 ### Install
 ```bash
-pip install -r requirements.txt
+./dependencies.sh
+./packages.sh
 ```
 
 ### Run
 
 ```bash
+sh src/.fix.sh
 python3 src/bot.py
+```
+
+### Fix package warnings
+
+> **Warning:** Experimental!
+
+```bash
+./experimental.sh
 ```
