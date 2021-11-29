@@ -8,7 +8,6 @@ except ImportError:
 
 import discord
 import datetime
-from discord.ui.select import S
 import humanize
 import dateparser
 import discord.commands
@@ -22,6 +21,7 @@ class Music(commands.Cog):
         self.client = client
 
     async def leave(self, ctx):
+        """Simulates my dad."""
         bot_account = await ctx.guild.fetch_member(self.client.user.id)
         await bot_account.move_to(None)
 
@@ -48,7 +48,7 @@ class Music(commands.Cog):
 
         embed = discord.Embed(
             title=f'{"📡" if video_info["is_live"] else "🎵"} Playing: {player.title}',
-            description=f':loud_sound: Playing in {ctx.author.voice.channel .mention}',
+            description=f'{ctx.author.voice.channel.mention}',
             color=management.color(),
             timestamp=dateparser.parse(video_info['upload_date'], settings={'DATE_ORDER': 'YMD'}),
             url=player.url,
@@ -65,8 +65,6 @@ class Music(commands.Cog):
 
     class MusicEmbedGUI(discord.ui.View):
         def __init__(self, ctx, player):
-            super().__init__()
-
             self.ctx = ctx
             self.player = player
 
@@ -78,7 +76,7 @@ class Music(commands.Cog):
             # async def _():
             #     pass
 
-        # discord.ui.View.add_item(discord.ui.Button(label='Download', style=discord.ButtonStyle.url, url=))
+            super().__init__()
 
     @slash_command(description='🎶 Plays a song in a voice channel.')
     async def play(
@@ -88,7 +86,7 @@ class Music(commands.Cog):
     ):
         # ids = [emoji.id for emoji in ctx.guild.emojis]
         # await ctx.respond(embed=discord.Embed(title='<a:NVloading:908663225736904744> Give me a moment')) # fixes misleading message <Interaction Failed>
-        await ctx.respond('** **') # fixes misleading message <Interaction Failed>
+        sent = await ctx.respond(embed=discord.Embed(title='Loading...', color=management.color())) # fixes misleading message <Interaction Failed>
 
         await voice.ensure_voice(ctx)
 
@@ -102,10 +100,7 @@ class Music(commands.Cog):
         # view.add_item(discord.ui.button(label='Go to website', url='https://example.com/', style=discord.ButtonStyle.url))
         # view = self.MusicEmbedGUI(ctx=ctx, player=player)
 
-        try:
-            await ctx.respond(embed=embed, view=view)
-        except:
-            await ctx.send(embed=embed, view=view)
+        await sent.edit_original_message(embed=embed, view=view)
 
     @slash_command(description='🔊 Changes the music volume')
     async def volume(
@@ -116,11 +111,15 @@ class Music(commands.Cog):
         if ctx.voice_client is None:
             return await ctx.respond(embed=discord.Embed(title=f'Run `/join` and try again!', color=management.color('error')))
 
-        if volume == 1337:
+        if volume == 1337: # weird way to do it lol
             return await ctx.respond(embed=discord.Embed(title=f'Volume: {ctx.voice_client.source.volume * 100}%', color=management.color()))
 
         ctx.voice_client.source.volume = volume / 100
         await ctx.respond(embed=discord.Embed(title=f'Changed volume to {volume}%.', color=management.color()))
+
+    @slash_command(description='⏯️ Pause or unpause a song.')
+    async def pause(self, ctx):
+        await ctx.guild.voice_client.pause()
 
     @slash_command(description='🛑 Stops song and disconnects from the voice channel.')
     async def disconnect(

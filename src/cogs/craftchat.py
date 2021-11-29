@@ -42,8 +42,14 @@ class CraftChat(commands.Cog):
             if message.embeds:
                 log_message = message.embeds[0].author.name
 
-            if log_message.endswith(' joined the server'):
-                player = await voice.play_song(client=self.client, ctx=message, search_term='https://youtu.be/76EsiMBf1kY')
+                if log_message.endswith(' joined the server'):
+                    player = await voice.play_song(client=self.client, ctx=message, search_term='https://youtu.be/76EsiMBf1kY')
+
+                if log_message.endswith(' left the server'):
+                    player = await voice.play_song(client=self.client, ctx=message, search_term='https://youtu.be/WUl9NPPMx8s')
+
+                if int(message.embeds[0].color) == 0x000000:
+                    player = await voice.play_song(client=self.client, ctx=message, search_term='https://youtu.be/qlHXd4cWgtY')
 
             if '!play ' in message.content:
                 await voice.ensure_voice(message)
@@ -51,9 +57,11 @@ class CraftChat(commands.Cog):
                 try:
                     player = await voice.play_song(client=self.client, ctx=message, search_term=message.content.split('!play ')[1])
                 except AttributeError:
-                    await message.channel.send(f'[NOVALIX CraftChat] Please do !join @user or #channel first, for example: "!join #music" or "!join @ONLIX"')
+                    await message.channel.send(f'Error » Run "/join" in Discord or try "!join #channel" or "!join @user" in Minecraft and try again.')
+                except TypeError:
+                    await message.channel.send(f'Error » Couldn\'t play this. Maybe it\'s 18+, if so, try searching for the song\'s lyrics.')
                 else:
-                    await message.channel.send(f'[NOVALIX CraftChat] Playing Song: {player.title}')
+                    await message.channel.send(f'Playing » {player.title}')
 
             if '!join ' in message.content:
                 selected = message.content.split('!join ')[1]
@@ -66,12 +74,20 @@ class CraftChat(commands.Cog):
 
                 else:
                     member_names = [m.name for m in message.guild.members]
-                    found = difflib.get_close_matches(word=selected[1:], possibilities=member_names, n=1)[0] # I could leave this out, but it's for the UX
+                    try:
+                        found = difflib.get_close_matches(word=selected[1:], possibilities=member_names, n=1)[0] # I could leave this out, but it's for the UX
+                    except IndexError:
+                        return await message.channel.send('Try /join in Discord.')
                     member = discord.utils.get(message.guild.members, name=found)
                     channel = member.voice.channel
 
-                await channel.connect()
-                await message.channel.send(f'[NOVALIX CraftChat] Joined #{channel.name}!')
+                try:
+                    await channel.connect()
+                except discord.errors.ClientException:
+                    bot_account = await message.guild.fetch_member(self.client.user.id)
+                    await bot_account.move_to(channel)
+                finally:
+                    await message.channel.send(f'Joined #{channel.name}')
 
 def setup(client):
     client.add_cog(CraftChat(client))

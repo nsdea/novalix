@@ -1,3 +1,5 @@
+from . import management
+
 import discord
 import asyncio
 import youtube_dl
@@ -58,8 +60,10 @@ async def play_song(client, ctx, search_term: str):
         voice_system = ctx.guild.voice_client
 
     player = await YTDLSource.from_url(search_term, loop=client.loop, stream=True)
-    voice_system.play(player, after=lambda e: print(
-        f'Player error: {e}') if e else None)
+    try:
+        voice_system.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+    except discord.errors.ClientException:
+        return await ctx.respond(embed=discord.Embed(title=':x: You\'re not connected to a voice channel.', description='Please join a voice channel and run `/join`.', color=management.color('error')))
 
     ytdl.cache.remove()
     return player

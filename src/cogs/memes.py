@@ -35,7 +35,7 @@ class Memes(commands.Cog):
         sub: discord.commands.Option(str, 'Subreddit (default: random meme sub)', required=False, default='memes|dankmemes|me_irl|wholesomememes|okbuddyretard|comedyheaven|meme'),
         randomizer: discord.commands.Option(int, 'Randomizer Temperature (default: 60)', required=False, default=60)
     ):
-        
+
         class RedditGUI(discord.ui.View):
             @discord.ui.button(label='Another one', style=discord.ButtonStyle.primary)
             async def button_callback(self, button, interaction, *args, **kwargs):
@@ -45,7 +45,7 @@ class Memes(commands.Cog):
             msg = await ctx.respond(embed=discord.Embed(title='Gimme a sec...', description='> **Tip:** if it takes ages for the memes to load, set "randomizer" to a lower value (like 30), but if the memes are always the same ones, set "randomizer" to a high value.'))
 
             BASE_URL = 'https://reddit.com'
-            
+
             sub_name = sub
             if '|' in sub:
                 sub_name = random.choice(sub.split('|'))
@@ -59,7 +59,7 @@ class Memes(commands.Cog):
 
                 if p.url.endswith('.jpg') and len(p.title) < 256:
                     posts.append(p)
-            
+
             try:
                 post = random.choice(posts)
             except:
@@ -75,7 +75,11 @@ class Memes(commands.Cog):
             ).set_image(url=post.url).set_author(name=post.author).set_footer(text=f'r/{sub_name}')
 
             gui = RedditGUI()
-            await ctx.respond(embed=embed, view=gui)
+
+            if isinstance(msg, discord.Interaction):
+                await msg.edit_original_message(embed=embed, view=gui)
+            else:
+                await msg.edit(embed=embed, view=gui)
 
             return msg
 

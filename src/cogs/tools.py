@@ -7,7 +7,7 @@ import socket
 import discord.commands
 
 from discord.ext import commands
-from discord.commands import slash_command
+from discord.commands import slash_command, message_command
 
 class Tools(commands.Cog):
     def __init__(self, client):
@@ -28,10 +28,14 @@ class Tools(commands.Cog):
             description=f'I just reacted with {emoji}.',
             color=management.color(),
         )
-        
+
         async for message in ctx.channel.history(limit=1):
             await message.add_reaction(emoji)
         await ctx.respond(embed=embed)
+
+    @message_command(name='👨‍💻 Syntax highlight this message')  # creates a global message command
+    async def syntax(ctx, message: discord.Message):  # message commands return the message
+        await ctx.respond(f'```py\n{message.content}\n```')
 
 def setup(client):
     client.add_cog(Tools(client))
